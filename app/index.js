@@ -19,11 +19,11 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       <Image source={{ uri: 'https://placehold.co/160x160?text=Logo' }} style={styles.logo} />
-      <Text style={styles.title}>AVG Cleaner</Text>
+      <Text style={styles.title}>Cleaner</Text>
       <View style={{ flex: 1 }} />
       <Text style={styles.info}>
         Using this app and its features requires access to data about your installed apps which we collect and store locally to provide you with tips on space optimization and phone functionality.{"\n"}{"\n"}
-        By proceeding, you confirm you accept AVG's{' '}
+        By proceeding, you confirm you accept Cleaner's{' '}
         <Text style={styles.link} onPress={() => Linking.openURL('https://www.avg.com/eula')}>Agreement</Text>
         {' '}and{' '}
         <Text style={styles.link} onPress={() => Linking.openURL('https://www.avg.com/privacy')}>Privacy Policy</Text>.

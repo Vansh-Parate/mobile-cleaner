@@ -265,7 +265,7 @@ export default function CleanResultsScreen() {
             <Ionicons name="trash-outline" size={36} color={ORANGE} style={{ marginBottom: 12 }} />
             <Text style={styles.modalTitle}>Clear temporary app files</Text>
             <Text style={styles.modalDesc}>
-              AVG Cleaner would like to clear some temporary files. This may result in an increased usage of battery or mobile data.
+              Cleaner would like to clear some temporary files. This may result in an increased usage of battery or mobile data.
             </Text>
             <View style={styles.modalBtnRow}>
               <Pressable onPress={handleCancel} style={styles.modalBtn}>

@@ -44,7 +44,7 @@ export default function AdvancedIssuesScreen() {
             <Ionicons name="alert" size={28} color={YELLOW} />
           </View>
           <Text style={styles.issuesTitle}>3 advanced issues</Text>
-          <Text style={styles.issuesSubtitle}>Resolve these issues with AVG Cleaner Premium</Text>
+          <Text style={styles.issuesSubtitle}>Resolve these issues with Cleaner Premium</Text>
         </View>
         <View style={styles.sectionRow}>
           <Text style={styles.sectionTitle}>Detailed results</Text>

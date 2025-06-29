@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Modal, TouchableWithoutFeedback, Image } from 'react-native';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { useEffect, useState } from 'react';
@@ -12,11 +12,39 @@ const BLUE = '#4FC3F7';
 const PURPLE = '#A259FF';
 const YELLOW = '#FFD600';
 
+const storageIcons = {
+  Apps: <FontAwesome5 name="th-large" size={22} color={LIGHT_GREY} style={{ marginRight: 12 }} />,
+  Photos: <Ionicons name="images-outline" size={22} color={LIGHT_GREY} style={{ marginRight: 12 }} />,
+  Audio: <Feather name="music" size={22} color={LIGHT_GREY} style={{ marginRight: 12 }} />,
+  Videos: <Ionicons name="videocam-outline" size={22} color={LIGHT_GREY} style={{ marginRight: 12 }} />,
+  'Other files': <Feather name="file" size={22} color={LIGHT_GREY} style={{ marginRight: 12 }} />,
+};
+
+const menuItems = [
+  { icon: <FontAwesome5 name="th-large" size={20} color={LIGHT_GREY} />, label: 'Photo Optimizer' },
+  { icon: <Feather name="cloud" size={20} color={LIGHT_GREY} />, label: 'Cloud Transfers' },
+  { icon: <Ionicons name="phone-portrait-outline" size={20} color={LIGHT_GREY} />, label: 'System Info' },
+  { icon: <MaterialCommunityIcons name="medal-outline" size={20} color={LIGHT_GREY} />, label: 'My subscription' },
+  { icon: <Feather name="settings" size={20} color={LIGHT_GREY} />, label: 'Settings' },
+  { icon: <Feather name="aperture" size={20} color={LIGHT_GREY} />, label: 'Themes' },
+  { icon: <Ionicons name="help-circle-outline" size={20} color={LIGHT_GREY} />, label: 'Help & Feedback' },
+  { icon: <Feather name="info" size={20} color={LIGHT_GREY} />, label: 'About this app' },
+];
+
 export default function Dashboard() {
   const [freeSpace, setFreeSpace] = useState(null);
   const [totalSpace, setTotalSpace] = useState(null);
   const [mediaStats, setMediaStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Simulated storage breakdown (replace with real logic if needed)
+  const [storageBreakdown, setStorageBreakdown] = useState({
+    Apps: 43.2,
+    Photos: 5.14,
+    Audio: 1.59,
+    Videos: 10.4,
+    'Other files': 5.57,
+  });
 
   useEffect(() => {
     async function fetchStats() {
@@ -30,6 +58,7 @@ export default function Dashboard() {
         setFreeSpace(free);
         setTotalSpace(total);
         setMediaStats(media);
+        // TODO: Replace with real breakdown if possible
       } catch (e) {
         setFreeSpace(null);
         setTotalSpace(null);
@@ -51,12 +80,60 @@ export default function Dashboard() {
 
   return (
     <View style={styles.container}>
+      {/* Drawer Overlay */}
+      <Modal visible={drawerOpen} animationType="slide" transparent onRequestClose={() => setDrawerOpen(false)}>
+        <TouchableWithoutFeedback onPress={() => setDrawerOpen(false)}>
+          <View style={styles.drawerOverlay} />
+        </TouchableWithoutFeedback>
+        <View style={styles.drawer}>
+          <ScrollView contentContainerStyle={styles.drawerScrollContent} showsVerticalScrollIndicator={false}>
+            {/* Premium Card */}
+            <View style={styles.drawerHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
+                <Image source={{ uri: 'https://placehold.co/48x48?text=Cleaner' }} style={styles.drawerLogo} />
+                <Text style={styles.drawerLogoText}>Cleaner</Text>
+              </View>
+              <View style={styles.premiumRow}>
+                <Ionicons name="lock-closed" size={24} color={ORANGE} style={{ marginRight: 10 }} />
+                <View>
+                  <Text style={styles.premiumTitle}>Premium</Text>
+                  <Text style={styles.premiumDesc}>Clean and manage your apps with advanced features and no more ads!</Text>
+                </View>
+              </View>
+              <Pressable style={styles.upgradeOptionsBtn}><Text style={styles.upgradeOptionsBtnText}>UPGRADE OPTIONS</Text></Pressable>
+              <Pressable style={styles.exploreBtn}><Text style={styles.exploreBtnText}>EXPLORE FEATURES</Text></Pressable>
+            </View>
+            {/* Storage Breakdown */}
+            <Text style={styles.storageSectionTitle}>STORAGE</Text>
+            <View style={styles.storageBreakdown}>
+              {Object.entries(storageBreakdown).map(([label, value]) => (
+                <View style={styles.storageRow} key={label}>
+                  {storageIcons[label]}
+                  <Text style={styles.storageLabelText}>{label}</Text>
+                  <View style={{ flex: 1 }} />
+                  <Text style={styles.storageValueText}>{value} {label === 'Audio' ? 'MB' : 'GB'}</Text>
+                </View>
+              ))}
+            </View>
+            {/* Menu Items */}
+            <View style={styles.menuSection}>
+              {menuItems.map((item, i) => (
+                <View style={styles.menuRow} key={i}>
+                  {item.icon}
+                  <Text style={styles.menuLabel}>{item.label}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={{ height: 32 }} />
+          </ScrollView>
+        </View>
+      </Modal>
       {/* Header */}
       <View style={styles.headerRow}>
-        <Pressable>
+        <Pressable onPress={() => setDrawerOpen(true)}>
           <Ionicons name="menu" size={28} color="#fff" />
         </Pressable>
-        <Text style={styles.header}>AVG Cleaner</Text>
+        <Text style={styles.header}>Cleaner</Text>
         <Pressable style={styles.upgradeBtn}>
           <Text style={styles.upgradeBtnText}>UPGRADE</Text>
         </Pressable>
@@ -297,5 +374,140 @@ const styles = StyleSheet.create({
     marginTop: 8,
     alignItems: 'center',
     paddingVertical: 18,
+  },
+  drawerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    zIndex: 1,
+  },
+  drawer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 320,
+    height: '100%',
+    backgroundColor: '#3A3F4B',
+    zIndex: 2,
+    paddingTop: 36,
+    paddingHorizontal: 0,
+    paddingBottom: 0,
+    borderTopRightRadius: 18,
+    borderBottomRightRadius: 18,
+    elevation: 10,
+  },
+  drawerScrollContent: {
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+    paddingTop: 0,
+  },
+  drawerHeader: {
+    marginBottom: 28,
+    marginTop: 4,
+  },
+  drawerLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    marginRight: 10,
+    backgroundColor: '#fff',
+  },
+  drawerLogoText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 22,
+    letterSpacing: 1,
+  },
+  premiumRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  premiumTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 17,
+    marginBottom: 2,
+  },
+  premiumDesc: {
+    color: LIGHT_GREY,
+    fontSize: 14,
+    marginBottom: 0,
+    maxWidth: 200,
+  },
+  upgradeOptionsBtn: {
+    backgroundColor: ORANGE,
+    borderRadius: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  upgradeOptionsBtnText: {
+    color: BLACK,
+    fontWeight: 'bold',
+    fontSize: 15,
+    letterSpacing: 1,
+  },
+  exploreBtn: {
+    borderWidth: 1.5,
+    borderColor: '#fff',
+    borderRadius: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  exploreBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+    letterSpacing: 1,
+  },
+  storageSectionTitle: {
+    color: LIGHT_GREY,
+    fontWeight: 'bold',
+    fontSize: 13,
+    marginTop: 0,
+    marginBottom: 10,
+    letterSpacing: 1,
+  },
+  storageBreakdown: {
+    marginBottom: 24,
+  },
+  storageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  storageLabelText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginRight: 4,
+  },
+  storageValueText: {
+    color: LIGHT_GREY,
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  menuSection: {
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#444B54',
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
+  menuLabel: {
+    color: '#fff',
+    fontSize: 15,
+    marginLeft: 16,
+    fontWeight: 'bold',
   },
 }); 
