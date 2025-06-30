@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, SafeAreaView } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -28,58 +28,61 @@ export default function AccessScanScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>One down, one to go!</Text>
-      <View style={styles.illustration}>
-        {/* Placeholder for illustration */}
-        <Text style={{color: GREEN, fontSize: 80}}>📱</Text>
+    <SafeAreaView style={styles.container}>
+      {/* Main content with top gap */}
+      <View style={{ flex: 1, paddingTop: 32 }}>
+        <Text style={styles.header}>One down, one to go!</Text>
+        <View style={styles.illustration}>
+          {/* Placeholder for illustration */}
+          <Text style={{color: GREEN, fontSize: 80}}>📱</Text>
+        </View>
+        <View style={styles.statsRow}>
+          <View style={{alignItems: 'center', marginRight: 32}}>
+            <Text style={styles.statsValue}>{freeSpace} <Text style={{fontSize: 18}}>GB</Text></Text>
+            <Text style={styles.statsLabel}>Free space</Text>
+          </View>
+          <View style={{alignItems: 'center'}}>
+            <Text style={[styles.statsValue, {color: GREEN}]}>{usedPercent} <Text style={{fontSize: 18}}>%</Text></Text>
+            <Text style={styles.statsLabel}>Used space</Text>
+          </View>
+        </View>
+        <View style={{height: 32}} />
+        <View style={styles.stepper}>
+          <View style={styles.stepRow}>
+            <View style={[styles.circle, {backgroundColor: permissionGranted ? GREEN : ORANGE}]}> 
+              <Text style={styles.circleText}>1</Text>
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.stepTitle}>Give us access</Text>
+              <Text style={styles.stepDesc}>We need permission to clean your photos, media, and files.</Text>
+            </View>
+            <Pressable onPress={handlePermission} disabled={permissionGranted} style={({pressed}) => [styles.arrowBtn, {opacity: permissionGranted ? 0.5 : 1}]}> 
+              <Text style={{fontSize: 22, color: permissionGranted ? GREY : GREEN}}>&#8594;</Text>
+            </Pressable>
+          </View>
+          <View style={styles.stepRow}>
+            <View style={[styles.circle, {backgroundColor: permissionGranted ? ORANGE : GREY}]}> 
+              <Text style={styles.circleText}>2</Text>
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.stepTitle}>Scan for junk</Text>
+              <Text style={styles.stepDesc}>We'll show you what can be safely removed to free up space.</Text>
+            </View>
+          </View>
+        </View>
+        <View style={{flex: 1}} />
+        <Pressable
+          style={[styles.resultsBtn, {backgroundColor: permissionGranted ? ORANGE : GREY}]}
+          disabled={!permissionGranted}
+          onPress={() => {
+            if (permissionGranted) router.push('/scanning');
+          }}
+        >
+          <Text style={styles.resultsBtnText}>SEE RESULTS</Text>
+        </Pressable>
+        <View style={{ height: 32 }} />
       </View>
-      <View style={styles.statsRow}>
-        <View style={{alignItems: 'center', marginRight: 32}}>
-          <Text style={styles.statsValue}>{freeSpace} <Text style={{fontSize: 18}}>GB</Text></Text>
-          <Text style={styles.statsLabel}>Free space</Text>
-        </View>
-        <View style={{alignItems: 'center'}}>
-          <Text style={[styles.statsValue, {color: GREEN}]}>{usedPercent} <Text style={{fontSize: 18}}>%</Text></Text>
-          <Text style={styles.statsLabel}>Used space</Text>
-        </View>
-      </View>
-      <View style={{height: 32}} />
-      <View style={styles.stepper}>
-        <View style={styles.stepRow}>
-          <View style={[styles.circle, {backgroundColor: permissionGranted ? GREEN : ORANGE}]}> 
-            <Text style={styles.circleText}>1</Text>
-          </View>
-          <View style={{flex: 1}}>
-            <Text style={styles.stepTitle}>Give us access</Text>
-            <Text style={styles.stepDesc}>We need permission to clean your photos, media, and files.</Text>
-          </View>
-          <Pressable onPress={handlePermission} disabled={permissionGranted} style={({pressed}) => [styles.arrowBtn, {opacity: permissionGranted ? 0.5 : 1}]}> 
-            <Text style={{fontSize: 22, color: permissionGranted ? GREY : GREEN}}>&#8594;</Text>
-          </Pressable>
-        </View>
-        <View style={styles.stepRow}>
-          <View style={[styles.circle, {backgroundColor: permissionGranted ? ORANGE : GREY}]}> 
-            <Text style={styles.circleText}>2</Text>
-          </View>
-          <View style={{flex: 1}}>
-            <Text style={styles.stepTitle}>Scan for junk</Text>
-            <Text style={styles.stepDesc}>We'll show you what can be safely removed to free up space.</Text>
-          </View>
-        </View>
-      </View>
-      <View style={{flex: 1}} />
-      <Pressable
-        style={[styles.resultsBtn, {backgroundColor: permissionGranted ? ORANGE : GREY}]}
-        disabled={!permissionGranted}
-        onPress={() => {
-          if (permissionGranted) router.push('/scanning');
-        }}
-      >
-        <Text style={styles.resultsBtnText}>SEE RESULTS</Text>
-      </Pressable>
-      <View style={{ height: 32 }} />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -88,7 +91,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: BLACK,
     padding: 24,
-    paddingTop: 48,
+    paddingTop: 32,
   },
   header: {
     color: '#fff',

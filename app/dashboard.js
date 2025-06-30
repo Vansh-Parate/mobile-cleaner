@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Modal, TouchableWithoutFeedback, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Modal, TouchableWithoutFeedback, Image, Animated, Easing, SafeAreaView } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 const ORANGE = '#FFA500';
 const BLACK = '#23272F';
@@ -37,6 +37,8 @@ export default function Dashboard() {
   const [mediaStats, setMediaStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerAnim = useRef(new Animated.Value(-320)).current;
+  const overlayAnim = useRef(new Animated.Value(0)).current;
   // Simulated storage breakdown (replace with real logic if needed)
   const [storageBreakdown, setStorageBreakdown] = useState({
     Apps: 43.2,
@@ -69,6 +71,38 @@ export default function Dashboard() {
     fetchStats();
   }, []);
 
+  useEffect(() => {
+    if (drawerOpen) {
+      Animated.parallel([
+        Animated.timing(drawerAnim, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(overlayAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        })
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(drawerAnim, {
+          toValue: -320,
+          duration: 300,
+          easing: Easing.in(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(overlayAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        })
+      ]).start();
+    }
+  }, [drawerOpen]);
+
   let freeGB = freeSpace ? (freeSpace / (1024 ** 3)).toFixed(1) : '--';
   let totalGB = totalSpace ? (totalSpace / (1024 ** 3)).toFixed(1) : '--';
   let usedPercent = (freeSpace && totalSpace) ? (100 - (freeSpace / totalSpace) * 100).toFixed(0) : '--';
@@ -79,13 +113,13 @@ export default function Dashboard() {
   let reviewGB = (mediaCount * 0.002).toFixed(1); // fake: 2MB per file
 
   return (
-    <View style={styles.container}>
-      {/* Drawer Overlay */}
-      <Modal visible={drawerOpen} animationType="slide" transparent onRequestClose={() => setDrawerOpen(false)}>
+    <SafeAreaView style={styles.container}>
+      {/* Drawer Overlay & Drawer - OUTSIDE the padded main content */}
+      <Modal visible={drawerOpen} transparent animationType="none" onRequestClose={() => setDrawerOpen(false)}>
         <TouchableWithoutFeedback onPress={() => setDrawerOpen(false)}>
-          <View style={styles.drawerOverlay} />
+          <Animated.View style={[styles.drawerOverlay, { opacity: overlayAnim }]} />
         </TouchableWithoutFeedback>
-        <View style={styles.drawer}>
+        <Animated.View style={[styles.drawer, { transform: [{ translateX: drawerAnim }] }]}> 
           <ScrollView contentContainerStyle={styles.drawerScrollContent} showsVerticalScrollIndicator={false}>
             {/* Premium Card */}
             <View style={styles.drawerHeader}>
@@ -126,84 +160,86 @@ export default function Dashboard() {
             </View>
             <View style={{ height: 32 }} />
           </ScrollView>
-        </View>
+        </Animated.View>
       </Modal>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Pressable onPress={() => setDrawerOpen(true)}>
-          <Ionicons name="menu" size={28} color="#fff" />
-        </Pressable>
-        <Text style={styles.header}>Cleaner</Text>
-        <Pressable style={styles.upgradeBtn}>
-          <Text style={styles.upgradeBtnText}>UPGRADE</Text>
-        </Pressable>
+      {/* Main content with top gap */}
+      <View style={{ flex: 1, paddingTop: 32 }}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => setDrawerOpen(true)}>
+            <Ionicons name="menu" size={28} color="#fff" />
+          </Pressable>
+          <Text style={styles.header}>Cleaner</Text>
+          <Pressable style={styles.upgradeBtn}>
+            <Text style={styles.upgradeBtnText}>UPGRADE</Text>
+          </Pressable>
+        </View>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
+          {/* Storage Card */}
+          <View style={styles.storageCard}>
+            <Text style={styles.storageLabel}>Free space</Text>
+            {loading ? (
+              <ActivityIndicator color={ORANGE} style={{ marginVertical: 24 }} />
+            ) : (
+              <>
+                <Text style={styles.storageValue}>{freeGB} <Text style={{ fontSize: 14, color: '#fff' }}>GB</Text></Text>
+                <Text style={styles.storageSub}>Free up to <Text style={{ fontWeight: 'bold', color: '#fff' }}>{totalGB} GB</Text></Text>
+                <View style={styles.barRow}>
+                  <View style={[styles.barSeg, { backgroundColor: BLUE, flex: 0.15 }]} />
+                  <View style={[styles.barSeg, { backgroundColor: ORANGE, flex: 0.25 }]} />
+                  <View style={[styles.barSeg, { backgroundColor: PURPLE, flex: 0.6 }]} />
+                </View>
+                <View style={styles.legendRow}>
+                  <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: BLUE }]} /><Text style={styles.legendText}>Unneeded files</Text></View>
+                  <Text style={styles.legendValue}>{unneededMB} MB</Text>
+                </View>
+                <View style={styles.legendRow}>
+                  <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: ORANGE }]} /><Text style={styles.legendText}>Hidden caches</Text></View>
+                  <Text style={styles.legendValue}>{hiddenGB} GB</Text>
+                </View>
+                <View style={styles.legendRow}>
+                  <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: PURPLE }]} /><Text style={styles.legendText}>Files to review</Text></View>
+                  <Text style={styles.legendValue}>{reviewGB} GB</Text>
+                </View>
+                <Pressable style={styles.quickCleanBtn}>
+                  <Text style={styles.quickCleanBtnText}>QUICK CLEAN</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+          {/* Feature Grid */}
+          <View style={styles.gridRow}>
+            <View style={styles.gridCard}>
+              <MaterialCommunityIcons name="speedometer" size={28} color={LIGHT_GREY} />
+              <Text style={styles.gridTitle}>Sleep Mode</Text>
+            </View>
+            <View style={styles.gridCard}>
+              <Ionicons name="bulb-outline" size={28} color={LIGHT_GREY} />
+              <Text style={styles.gridTitle}>Tips</Text>
+            </View>
+          </View>
+          <View style={styles.gridRow}>
+            <View style={styles.gridCard}>
+              <Ionicons name="images-outline" size={28} color={LIGHT_GREY} />
+              <Text style={styles.gridTitle}>Media</Text>
+              <Text style={styles.gridValue}>+ {mediaCount} files</Text>
+            </View>
+            <View style={styles.gridCard}>
+              <Ionicons name="apps-outline" size={28} color={LIGHT_GREY} />
+              <Text style={styles.gridTitle}>Apps</Text>
+              <Text style={styles.gridValue}>+ 43.2 GB</Text>
+            </View>
+          </View>
+          {/* Customize Section */}
+          <View style={styles.customizeRow}>
+            <Ionicons name="lock-closed" size={20} color={ORANGE} style={{ marginRight: 8 }} />
+            <Text style={styles.customizeText}>Customize</Text>
+          </View>
+          <View style={styles.illustrationCard}>
+            <MaterialCommunityIcons name="shield-check-outline" size={80} color={PURPLE} style={{ marginTop: 16 }} />
+          </View>
+        </ScrollView>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Storage Card */}
-        <View style={styles.storageCard}>
-          <Text style={styles.storageLabel}>Free space</Text>
-          {loading ? (
-            <ActivityIndicator color={ORANGE} style={{ marginVertical: 24 }} />
-          ) : (
-            <>
-              <Text style={styles.storageValue}>{freeGB} <Text style={{ fontSize: 14, color: '#fff' }}>GB</Text></Text>
-              <Text style={styles.storageSub}>Free up to <Text style={{ fontWeight: 'bold', color: '#fff' }}>{totalGB} GB</Text></Text>
-              <View style={styles.barRow}>
-                <View style={[styles.barSeg, { backgroundColor: BLUE, flex: 0.15 }]} />
-                <View style={[styles.barSeg, { backgroundColor: ORANGE, flex: 0.25 }]} />
-                <View style={[styles.barSeg, { backgroundColor: PURPLE, flex: 0.6 }]} />
-              </View>
-              <View style={styles.legendRow}>
-                <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: BLUE }]} /><Text style={styles.legendText}>Unneeded files</Text></View>
-                <Text style={styles.legendValue}>{unneededMB} MB</Text>
-              </View>
-              <View style={styles.legendRow}>
-                <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: ORANGE }]} /><Text style={styles.legendText}>Hidden caches</Text></View>
-                <Text style={styles.legendValue}>{hiddenGB} GB</Text>
-              </View>
-              <View style={styles.legendRow}>
-                <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: PURPLE }]} /><Text style={styles.legendText}>Files to review</Text></View>
-                <Text style={styles.legendValue}>{reviewGB} GB</Text>
-              </View>
-              <Pressable style={styles.quickCleanBtn}>
-                <Text style={styles.quickCleanBtnText}>QUICK CLEAN</Text>
-              </Pressable>
-            </>
-          )}
-        </View>
-        {/* Feature Grid */}
-        <View style={styles.gridRow}>
-          <View style={styles.gridCard}>
-            <MaterialCommunityIcons name="speedometer" size={28} color={LIGHT_GREY} />
-            <Text style={styles.gridTitle}>Sleep Mode</Text>
-          </View>
-          <View style={styles.gridCard}>
-            <Ionicons name="bulb-outline" size={28} color={LIGHT_GREY} />
-            <Text style={styles.gridTitle}>Tips</Text>
-          </View>
-        </View>
-        <View style={styles.gridRow}>
-          <View style={styles.gridCard}>
-            <Ionicons name="images-outline" size={28} color={LIGHT_GREY} />
-            <Text style={styles.gridTitle}>Media</Text>
-            <Text style={styles.gridValue}>+ {mediaCount} files</Text>
-          </View>
-          <View style={styles.gridCard}>
-            <Ionicons name="apps-outline" size={28} color={LIGHT_GREY} />
-            <Text style={styles.gridTitle}>Apps</Text>
-            <Text style={styles.gridValue}>+ 43.2 GB</Text>
-          </View>
-        </View>
-        {/* Customize Section */}
-        <View style={styles.customizeRow}>
-          <Ionicons name="lock-closed" size={20} color={ORANGE} style={{ marginRight: 8 }} />
-          <Text style={styles.customizeText}>Customize</Text>
-        </View>
-        <View style={styles.illustrationCard}>
-          <MaterialCommunityIcons name="shield-check-outline" size={80} color={PURPLE} style={{ marginTop: 16 }} />
-        </View>
-      </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -211,7 +247,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BLACK,
-    paddingTop: 36,
+    paddingTop: 32,
   },
   headerRow: {
     flexDirection: 'row',

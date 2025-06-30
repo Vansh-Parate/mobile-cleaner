@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Modal, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -87,178 +87,8 @@ export default function CleanResultsScreen() {
   const handleCancel = () => setShowModal(false);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="#fff" />
-        </Pressable>
-        <Text style={styles.header}>Quick Clean</Text>
-        <Pressable onPress={() => router.push('/quick-clean-settings')}>
-          <Ionicons name="settings-outline" size={26} color="#fff" />
-        </Pressable>
-      </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
-        <Text style={styles.sectionTitle}>UNNEEDED FILES</Text>
-        <Text style={styles.sectionDesc}>Files that are safe to delete and won't impact your device's functionality.</Text>
-        {/* Advanced cleaning sections with lock */}
-        {advancedSections.slice(0, 2).map((item) => (
-          <View key={item.key} style={styles.card}>
-            <Ionicons name="lock-closed" size={22} color={ORANGE} style={styles.checkbox} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.label}</Text>
-              <Text style={styles.cardDesc}>{item.desc}</Text>
-            </View>
-          </View>
-        ))}
-        <View style={styles.card}>
-          <Pressable
-            style={styles.checkbox}
-            onPress={() => setSelected((s) => ({ ...s, visible: !s.visible }))}
-          >
-            {selected.visible ? (
-              <Ionicons name="checkbox" size={22} color={ORANGE} />
-            ) : (
-              <Ionicons name="square-outline" size={22} color={GREY} />
-            )}
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.cardTitle}>Visible caches</Text>
-            <Text style={styles.cardDesc}>{mediaFiles.length} media files</Text>
-            {expanded.visible && mediaFiles.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                {mediaFiles.map((file) => (
-                  <View key={file.id} style={styles.folderRow}>
-                    <Ionicons name="image-outline" size={20} color={ORANGE} style={{ marginRight: 8 }} />
-                    <Text style={styles.folderName}>{file.filename}</Text>
-                    <Text style={styles.folderSize}>{file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-          <Pressable onPress={() => toggleExpand('visible')}>
-            <Ionicons name={expanded.visible ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
-          </Pressable>
-        </View>
-        <View style={styles.card}>
-          <View style={styles.checkbox} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.cardTitle}>Thumbnails</Text>
-            <Text style={styles.cardDesc}>{thumbnails.length} found</Text>
-            {expanded.thumbs && thumbnails.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                {thumbnails.map((file) => (
-                  <View key={file.id} style={styles.folderRow}>
-                    <Ionicons name="image-outline" size={20} color={ORANGE} style={{ marginRight: 8 }} />
-                    <Text style={styles.folderName}>{file.filename}</Text>
-                    <Text style={styles.folderSize}>{file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-          <Pressable onPress={() => toggleExpand('thumbs')}>
-            <Ionicons name={expanded.thumbs ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
-          </Pressable>
-        </View>
-        <View style={styles.card}>
-          <Pressable
-            style={styles.checkbox}
-            onPress={() => setSelected((s) => ({ ...s, empty: !s.empty }))}
-          >
-            {selected.empty ? (
-              <Ionicons name="checkbox" size={22} color={ORANGE} />
-            ) : (
-              <Ionicons name="square-outline" size={22} color={GREY} />
-            )}
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.cardTitle}>Empty folders</Text>
-            <Text style={styles.cardDesc}>{emptyFolders.length} found in app storage</Text>
-            {expanded.empty && emptyFolders.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                {emptyFolders.map((folder) => (
-                  <View key={folder.name} style={styles.folderRow}>
-                    <Ionicons name="folder-outline" size={20} color={ORANGE} style={{ marginRight: 8 }} />
-                    <Text style={styles.folderName}>{folder.name}</Text>
-                    <Text style={styles.folderSize}>{folder.size}</Text>
-                    <Pressable onPress={() => toggleFolder(folder.name)}>
-                      {selectedFolders[folder.name] ? (
-                        <Ionicons name="checkbox" size={18} color={ORANGE} />
-                      ) : (
-                        <Ionicons name="square-outline" size={18} color={GREY} />
-                      )}
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-          <Pressable onPress={() => toggleExpand('empty')}>
-            <Ionicons name={expanded.empty ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
-          </Pressable>
-        </View>
-        {/* Divider and FILES TO REVIEW section */}
-        <View style={styles.sectionDivider} />
-        <Text style={styles.sectionTitle}>FILES TO REVIEW</Text>
-        <Text style={styles.sectionDesc}>Files that may be valuable to you. Review before deleting.</Text>
-        {advancedSections.slice(2).map((item) => (
-          <View key={item.key} style={styles.card}>
-            <Ionicons name="lock-closed" size={22} color={ORANGE} style={styles.checkbox} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.label}</Text>
-              <Text style={styles.cardDesc}>{item.desc}</Text>
-            </View>
-          </View>
-        ))}
-        <View style={styles.card}>
-          <View style={styles.checkbox} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.cardTitle}>Large old files</Text>
-            <Text style={styles.cardDesc}>{largeOldFiles.length} found</Text>
-            {expanded.large && largeOldFiles.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                {largeOldFiles.map((file) => (
-                  <View key={file.id} style={styles.folderRow}>
-                    <Ionicons name="document" size={20} color={ORANGE} style={{ marginRight: 8 }} />
-                    <Text style={styles.folderName}>{file.filename}</Text>
-                    <Text style={styles.folderSize}>{file.size ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : ''}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-          <Pressable onPress={() => toggleExpand('large')}>
-            <Ionicons name={expanded.large ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
-          </Pressable>
-        </View>
-        <View style={styles.card}>
-          <View style={styles.checkbox} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.cardTitle}>Downloads</Text>
-            <Text style={styles.cardDesc}>{downloads.length} found</Text>
-            {expanded.downloads && downloads.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                {downloads.map((file) => (
-                  <View key={file.name} style={styles.folderRow}>
-                    <Ionicons name="document" size={20} color={ORANGE} style={{ marginRight: 8 }} />
-                    <Text style={styles.folderName}>{file.name}</Text>
-                    <Text style={styles.folderSize}>{file.size}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-          <Pressable onPress={() => toggleExpand('downloads')}>
-            <Ionicons name={expanded.downloads ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
-          </Pressable>
-        </View>
-        <Text style={styles.selectedText}>{Object.values(selected).filter(Boolean).length} SELECTED</Text>
-      </ScrollView>
-      <Pressable style={styles.cleanBtn} onPress={handleFinishCleaning}>
-        <Text style={styles.cleanBtnText}>FINISH CLEANING</Text>
-      </Pressable>
-      {/* Modal for cleaning confirmation */}
+    <SafeAreaView style={styles.container}>
+      {/* Modal overlays - OUTSIDE the padded main content */}
       <Modal visible={showModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -278,7 +108,6 @@ export default function CleanResultsScreen() {
           </View>
         </View>
       </Modal>
-      {/* Cleaning overlay */}
       <Modal visible={showCleaning} transparent animationType="fade">
         <View style={styles.cleaningOverlay}>
           <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
@@ -290,7 +119,180 @@ export default function CleanResultsScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+      {/* Main content with top gap */}
+      <View style={{ flex: 1, paddingTop: 32 }}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={28} color="#fff" />
+          </Pressable>
+          <Text style={styles.header}>Quick Clean</Text>
+          <Pressable onPress={() => router.push('/quick-clean-settings')}>
+            <Ionicons name="settings-outline" size={26} color="#fff" />
+          </Pressable>
+        </View>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
+          <Text style={styles.sectionTitle}>UNNEEDED FILES</Text>
+          <Text style={styles.sectionDesc}>Files that are safe to delete and won't impact your device's functionality.</Text>
+          {/* Advanced cleaning sections with lock */}
+          {advancedSections.slice(0, 2).map((item) => (
+            <View key={item.key} style={styles.card}>
+              <Ionicons name="lock-closed" size={22} color={ORANGE} style={styles.checkbox} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{item.label}</Text>
+                <Text style={styles.cardDesc}>{item.desc}</Text>
+              </View>
+            </View>
+          ))}
+          <View style={styles.card}>
+            <Pressable
+              style={styles.checkbox}
+              onPress={() => setSelected((s) => ({ ...s, visible: !s.visible }))}
+            >
+              {selected.visible ? (
+                <Ionicons name="checkbox" size={22} color={ORANGE} />
+              ) : (
+                <Ionicons name="square-outline" size={22} color={GREY} />
+              )}
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>Visible caches</Text>
+              <Text style={styles.cardDesc}>{mediaFiles.length} media files</Text>
+              {expanded.visible && mediaFiles.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  {mediaFiles.map((file) => (
+                    <View key={file.id} style={styles.folderRow}>
+                      <Ionicons name="image-outline" size={20} color={ORANGE} style={{ marginRight: 8 }} />
+                      <Text style={styles.folderName}>{file.filename}</Text>
+                      <Text style={styles.folderSize}>{file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+            <Pressable onPress={() => toggleExpand('visible')}>
+              <Ionicons name={expanded.visible ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
+            </Pressable>
+          </View>
+          <View style={styles.card}>
+            <View style={styles.checkbox} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>Thumbnails</Text>
+              <Text style={styles.cardDesc}>{thumbnails.length} found</Text>
+              {expanded.thumbs && thumbnails.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  {thumbnails.map((file) => (
+                    <View key={file.id} style={styles.folderRow}>
+                      <Ionicons name="image-outline" size={20} color={ORANGE} style={{ marginRight: 8 }} />
+                      <Text style={styles.folderName}>{file.filename}</Text>
+                      <Text style={styles.folderSize}>{file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+            <Pressable onPress={() => toggleExpand('thumbs')}>
+              <Ionicons name={expanded.thumbs ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
+            </Pressable>
+          </View>
+          <View style={styles.card}>
+            <Pressable
+              style={styles.checkbox}
+              onPress={() => setSelected((s) => ({ ...s, empty: !s.empty }))}
+            >
+              {selected.empty ? (
+                <Ionicons name="checkbox" size={22} color={ORANGE} />
+              ) : (
+                <Ionicons name="square-outline" size={22} color={GREY} />
+              )}
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>Empty folders</Text>
+              <Text style={styles.cardDesc}>{emptyFolders.length} found in app storage</Text>
+              {expanded.empty && emptyFolders.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  {emptyFolders.map((folder) => (
+                    <View key={folder.name} style={styles.folderRow}>
+                      <Ionicons name="folder-outline" size={20} color={ORANGE} style={{ marginRight: 8 }} />
+                      <Text style={styles.folderName}>{folder.name}</Text>
+                      <Text style={styles.folderSize}>{folder.size}</Text>
+                      <Pressable onPress={() => toggleFolder(folder.name)}>
+                        {selectedFolders[folder.name] ? (
+                          <Ionicons name="checkbox" size={18} color={ORANGE} />
+                        ) : (
+                          <Ionicons name="square-outline" size={18} color={GREY} />
+                        )}
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+            <Pressable onPress={() => toggleExpand('empty')}>
+              <Ionicons name={expanded.empty ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
+            </Pressable>
+          </View>
+          {/* Divider and FILES TO REVIEW section */}
+          <View style={styles.sectionDivider} />
+          <Text style={styles.sectionTitle}>FILES TO REVIEW</Text>
+          <Text style={styles.sectionDesc}>Files that may be valuable to you. Review before deleting.</Text>
+          {advancedSections.slice(2).map((item) => (
+            <View key={item.key} style={styles.card}>
+              <Ionicons name="lock-closed" size={22} color={ORANGE} style={styles.checkbox} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{item.label}</Text>
+                <Text style={styles.cardDesc}>{item.desc}</Text>
+              </View>
+            </View>
+          ))}
+          <View style={styles.card}>
+            <View style={styles.checkbox} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>Large old files</Text>
+              <Text style={styles.cardDesc}>{largeOldFiles.length} found</Text>
+              {expanded.large && largeOldFiles.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  {largeOldFiles.map((file) => (
+                    <View key={file.id} style={styles.folderRow}>
+                      <Ionicons name="document" size={20} color={ORANGE} style={{ marginRight: 8 }} />
+                      <Text style={styles.folderName}>{file.filename}</Text>
+                      <Text style={styles.folderSize}>{file.size ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : ''}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+            <Pressable onPress={() => toggleExpand('large')}>
+              <Ionicons name={expanded.large ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
+            </Pressable>
+          </View>
+          <View style={styles.card}>
+            <View style={styles.checkbox} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>Downloads</Text>
+              <Text style={styles.cardDesc}>{downloads.length} found</Text>
+              {expanded.downloads && downloads.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  {downloads.map((file) => (
+                    <View key={file.name} style={styles.folderRow}>
+                      <Ionicons name="document" size={20} color={ORANGE} style={{ marginRight: 8 }} />
+                      <Text style={styles.folderName}>{file.name}</Text>
+                      <Text style={styles.folderSize}>{file.size}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+            <Pressable onPress={() => toggleExpand('downloads')}>
+              <Ionicons name={expanded.downloads ? "chevron-up" : "chevron-down"} size={22} color={GREY} style={{ marginLeft: 8 }} />
+            </Pressable>
+          </View>
+          <Text style={styles.selectedText}>{Object.values(selected).filter(Boolean).length} SELECTED</Text>
+        </ScrollView>
+        <Pressable style={styles.cleanBtn} onPress={handleFinishCleaning}>
+          <Text style={styles.cleanBtnText}>FINISH CLEANING</Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BLACK,
-    paddingTop: 36,
+    paddingTop: 32,
   },
   headerRow: {
     flexDirection: 'row',

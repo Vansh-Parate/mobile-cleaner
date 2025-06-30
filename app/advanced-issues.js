@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, SafeAreaView } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -32,46 +32,48 @@ const issues = [
 export default function AdvancedIssuesScreen() {
   const router = useRouter();
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={26} color="#fff" />
+    <SafeAreaView style={styles.container}>
+      <View style={{ flex: 1, paddingTop: 32 }}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={26} color="#fff" />
+          </Pressable>
+        </View>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
+          <View style={{ alignItems: 'center', marginTop: 8, marginBottom: 14 }}>
+            <View style={styles.warningCircle}>
+              <Ionicons name="alert" size={28} color={YELLOW} />
+            </View>
+            <Text style={styles.issuesTitle}>3 advanced issues</Text>
+            <Text style={styles.issuesSubtitle}>Resolve these issues with Cleaner Premium</Text>
+          </View>
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionTitle}>Detailed results</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.sectionDesc}>2 items</Text>
+              <Ionicons name="chevron-forward" size={18} color={LIGHT_GREY} style={{ marginLeft: 2 }} />
+            </View>
+          </View>
+          <View style={styles.sectionDivider} />
+          {issues.map((item, i) => (
+            <View key={i} style={styles.card}>
+              <View style={styles.cardIcon}>{item.icon}</View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardDesc}>{item.desc}</Text>
+              </View>
+              {item.locked && <Ionicons name="lock-closed" size={20} color={ORANGE} style={{ marginLeft: 8 }} />}
+            </View>
+          ))}
+        </ScrollView>
+        <Pressable style={styles.resolveBtn} onPress={() => router.push('/dashboard')}>
+          <Text style={styles.resolveBtnText}>RESOLVE ALL</Text>
+        </Pressable>
+        <Pressable style={styles.skipBtn} onPress={() => router.push('/dashboard')}>
+          <Text style={styles.skipBtnText}>SKIP FOR NOW</Text>
         </Pressable>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
-        <View style={{ alignItems: 'center', marginTop: 8, marginBottom: 14 }}>
-          <View style={styles.warningCircle}>
-            <Ionicons name="alert" size={28} color={YELLOW} />
-          </View>
-          <Text style={styles.issuesTitle}>3 advanced issues</Text>
-          <Text style={styles.issuesSubtitle}>Resolve these issues with Cleaner Premium</Text>
-        </View>
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>Detailed results</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.sectionDesc}>2 items</Text>
-            <Ionicons name="chevron-forward" size={18} color={LIGHT_GREY} style={{ marginLeft: 2 }} />
-          </View>
-        </View>
-        <View style={styles.sectionDivider} />
-        {issues.map((item, i) => (
-          <View key={i} style={styles.card}>
-            <View style={styles.cardIcon}>{item.icon}</View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardDesc}>{item.desc}</Text>
-            </View>
-            {item.locked && <Ionicons name="lock-closed" size={20} color={ORANGE} style={{ marginLeft: 8 }} />}
-          </View>
-        ))}
-      </ScrollView>
-      <Pressable style={styles.resolveBtn} onPress={() => router.push('/dashboard')}>
-        <Text style={styles.resolveBtnText}>RESOLVE ALL</Text>
-      </Pressable>
-      <Pressable style={styles.skipBtn} onPress={() => router.push('/dashboard')}>
-        <Text style={styles.skipBtnText}>SKIP FOR NOW</Text>
-      </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -79,7 +81,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BLACK,
-    paddingTop: 36,
+    paddingTop: 32,
   },
   headerRow: {
     flexDirection: 'row',

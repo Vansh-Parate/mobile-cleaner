@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { useEffect, useState } from 'react';
 import * as FileSystem from 'expo-file-system';
 import { useRouter } from 'expo-router';
@@ -27,38 +27,41 @@ export default function ScanCompleteScreen() {
   let usedPercent = (freeSpace && totalSpace) ? (100 - (freeSpace / totalSpace) * 100).toFixed(0) : '--';
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>You're all set and ready to clean!</Text>
-      <View style={styles.illustration}>
-        {/* Placeholder for illustration */}
-        <Text style={{color: ORANGE, fontSize: 80}}>🧹</Text>
-      </View>
-      <View style={styles.statsRow}>
-        <View style={{alignItems: 'center', marginRight: 32}}>
-          <Text style={styles.statsValue}>{freeGB} <Text style={{fontSize: 18}}>GB</Text></Text>
-          <Text style={styles.statsLabel}>Free space</Text>
+    <SafeAreaView style={styles.container}>
+      {/* Main content with top gap */}
+      <View style={{ flex: 1, paddingTop: 32 }}>
+        <Text style={styles.header}>You're all set and ready to clean!</Text>
+        <View style={styles.illustration}>
+          {/* Placeholder for illustration */}
+          <Text style={{color: ORANGE, fontSize: 80}}>🧹</Text>
         </View>
-        <View style={{alignItems: 'center'}}>
-          <Text style={[styles.statsValue, {color: ORANGE}]}>{usedPercent} <Text style={{fontSize: 18}}>%</Text></Text>
-          <Text style={styles.statsLabel}>Used space</Text>
+        <View style={styles.statsRow}>
+          <View style={{alignItems: 'center', marginRight: 32}}>
+            <Text style={styles.statsValue}>{freeGB} <Text style={{fontSize: 18}}>GB</Text></Text>
+            <Text style={styles.statsLabel}>Free space</Text>
+          </View>
+          <View style={{alignItems: 'center'}}>
+            <Text style={[styles.statsValue, {color: ORANGE}]}>{usedPercent} <Text style={{fontSize: 18}}>%</Text></Text>
+            <Text style={styles.statsLabel}>Used space</Text>
+          </View>
         </View>
+        <Text style={styles.statsNote}>Values may differ slightly from system settings due to OS reporting.</Text>
+        <View style={{height: 32}} />
+        <View style={styles.checkRow}>
+          <CheckMark />
+          <Text style={styles.checkText}>Give us access</Text>
+        </View>
+        <View style={styles.checkRow}>
+          <CheckMark />
+          <Text style={styles.checkText}>Scan for junk</Text>
+        </View>
+        <View style={{flex: 1}} />
+        <Pressable style={styles.resultsBtn} onPress={() => router.push('/clean-results')}>
+          <Text style={styles.resultsBtnText}>SEE RESULTS</Text>
+        </Pressable>
+        <View style={{ height: 32 }} />
       </View>
-      <Text style={styles.statsNote}>Values may differ slightly from system settings due to OS reporting.</Text>
-      <View style={{height: 32}} />
-      <View style={styles.checkRow}>
-        <CheckMark />
-        <Text style={styles.checkText}>Give us access</Text>
-      </View>
-      <View style={styles.checkRow}>
-        <CheckMark />
-        <Text style={styles.checkText}>Scan for junk</Text>
-      </View>
-      <View style={{flex: 1}} />
-      <Pressable style={styles.resultsBtn} onPress={() => router.push('/clean-results')}>
-        <Text style={styles.resultsBtnText}>SEE RESULTS</Text>
-      </Pressable>
-      <View style={{ height: 32 }} />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -75,7 +78,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: BLACK,
     padding: 24,
-    paddingTop: 48,
+    paddingTop: 32,
   },
   header: {
     color: '#fff',

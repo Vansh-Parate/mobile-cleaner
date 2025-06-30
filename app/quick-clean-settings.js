@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Switch, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, Pressable, SafeAreaView } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -52,58 +52,60 @@ export default function QuickCleanSettings() {
   const handleToggle = (key) => setToggles((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="#fff" />
-        </Pressable>
-        <Text style={styles.header}>Quick Clean settings</Text>
-        <View style={{ width: 28 }} />
+    <SafeAreaView style={styles.container}>
+      <View style={{ flex: 1, paddingTop: 32 }}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={28} color="#fff" />
+          </Pressable>
+          <Text style={styles.header}>Quick Clean settings</Text>
+          <View style={{ width: 28 }} />
+        </View>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
+          <Text style={styles.sectionTitle}>UNNEEDED FILES</Text>
+          <Text style={styles.sectionDesc}>These items don't impact how your device works. You can safely delete them and you won't notice they're gone. You can still review these files before deleting.</Text>
+          {unneededCategories.map((item) => (
+            <View key={item.key} style={styles.card}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{item.label}</Text>
+                <Text style={styles.cardDesc}>{item.desc}</Text>
+              </View>
+              {item.locked ? (
+                <Ionicons name="lock-closed" size={22} color={ORANGE} />
+              ) : (
+                <Switch
+                  value={!!toggles[item.key]}
+                  onValueChange={() => handleToggle(item.key)}
+                  trackColor={{ false: GREY, true: ORANGE }}
+                  thumbColor={toggles[item.key] ? ORANGE : GREY}
+                />
+              )}
+            </View>
+          ))}
+          <View style={styles.sectionDivider} />
+          <Text style={styles.sectionTitle}>FILES TO REVIEW</Text>
+          <Text style={styles.sectionDesc}>These items may be valuable to you, so you might notice if they're gone. We recommend reviewing these files before deleting.</Text>
+          {reviewCategories.map((item) => (
+            <View key={item.key} style={styles.card}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{item.label}</Text>
+                <Text style={styles.cardDesc}>{item.desc}</Text>
+              </View>
+              {item.locked ? (
+                <Ionicons name="lock-closed" size={22} color={ORANGE} />
+              ) : (
+                <Switch
+                  value={!!toggles[item.key]}
+                  onValueChange={() => handleToggle(item.key)}
+                  trackColor={{ false: GREY, true: ORANGE }}
+                  thumbColor={toggles[item.key] ? ORANGE : GREY}
+                />
+              )}
+            </View>
+          ))}
+        </ScrollView>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
-        <Text style={styles.sectionTitle}>UNNEEDED FILES</Text>
-        <Text style={styles.sectionDesc}>These items don't impact how your device works. You can safely delete them and you won't notice they're gone. You can still review these files before deleting.</Text>
-        {unneededCategories.map((item) => (
-          <View key={item.key} style={styles.card}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.label}</Text>
-              <Text style={styles.cardDesc}>{item.desc}</Text>
-            </View>
-            {item.locked ? (
-              <Ionicons name="lock-closed" size={22} color={ORANGE} />
-            ) : (
-              <Switch
-                value={!!toggles[item.key]}
-                onValueChange={() => handleToggle(item.key)}
-                trackColor={{ false: GREY, true: ORANGE }}
-                thumbColor={toggles[item.key] ? ORANGE : GREY}
-              />
-            )}
-          </View>
-        ))}
-        <View style={styles.sectionDivider} />
-        <Text style={styles.sectionTitle}>FILES TO REVIEW</Text>
-        <Text style={styles.sectionDesc}>These items may be valuable to you, so you might notice if they're gone. We recommend reviewing these files before deleting.</Text>
-        {reviewCategories.map((item) => (
-          <View key={item.key} style={styles.card}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.label}</Text>
-              <Text style={styles.cardDesc}>{item.desc}</Text>
-            </View>
-            {item.locked ? (
-              <Ionicons name="lock-closed" size={22} color={ORANGE} />
-            ) : (
-              <Switch
-                value={!!toggles[item.key]}
-                onValueChange={() => handleToggle(item.key)}
-                trackColor={{ false: GREY, true: ORANGE }}
-                thumbColor={toggles[item.key] ? ORANGE : GREY}
-              />
-            )}
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -111,7 +113,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BLACK,
-    paddingTop: 36,
+    paddingTop: 32,
   },
   headerRow: {
     flexDirection: 'row',

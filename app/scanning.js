@@ -1,7 +1,3 @@
-import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'expo-router';
-import * as MediaLibrary from 'expo-media-library';
 import Svg, { Circle } from 'react-native-svg';
 
 const ORANGE = '#FFA500';
