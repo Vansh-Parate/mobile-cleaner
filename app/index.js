@@ -23,21 +23,21 @@ export default function WelcomeScreen() {
         <Image source={{ uri: 'https://placehold.co/160x160?text=Logo' }} style={styles.logo} />
         <Text style={styles.title}>Cleaner</Text>
         <View style={{ flex: 1 }} />
-        <Text style={styles.info}>
-          Using this app and its features requires access to data about your installed apps which we collect and store locally to provide you with tips on space optimization and phone functionality.{"\n"}{"\n"}
+      <Text style={styles.info}>
+        Using this app and its features requires access to data about your installed apps which we collect and store locally to provide you with tips on space optimization and phone functionality.{"\n"}{"\n"}
           By proceeding, you confirm you accept Cleaner's{' '}
-          <Text style={styles.link} onPress={() => Linking.openURL('https://www.avg.com/eula')}>Agreement</Text>
-          {' '}and{' '}
-          <Text style={styles.link} onPress={() => Linking.openURL('https://www.avg.com/privacy')}>Privacy Policy</Text>.
-        </Text>
+        <Text style={styles.link} onPress={() => Linking.openURL('https://www.avg.com/eula')}>Agreement</Text>
+        {' '}and{' '}
+        <Text style={styles.link} onPress={() => Linking.openURL('https://www.avg.com/privacy')}>Privacy Policy</Text>.
+      </Text>
         <Pressable style={styles.button} onPress={handleGetStarted} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'CHECKING...' : 'GET STARTED'}</Text>
-        </Pressable>
+      </Pressable>
         {mediaCount !== null && (
           <Text style={styles.resultText}>Media files found: {mediaCount}</Text>
         )}
         <View style={{ height: 32 }} />
-      </View>
+    </View>
     </SafeAreaView>
   );
 }

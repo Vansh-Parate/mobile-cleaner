@@ -2,7 +2,10 @@ import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Modal
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
+import * as Device from 'expo-device';
+import * as Application from 'expo-application';
 import { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'expo-router';
 
 const ORANGE = '#FFA500';
 const BLACK = '#23272F';
@@ -20,17 +23,6 @@ const storageIcons = {
   'Other files': <Feather name="file" size={22} color={LIGHT_GREY} style={{ marginRight: 12 }} />,
 };
 
-const menuItems = [
-  { icon: <FontAwesome5 name="th-large" size={20} color={LIGHT_GREY} />, label: 'Photo Optimizer' },
-  { icon: <Feather name="cloud" size={20} color={LIGHT_GREY} />, label: 'Cloud Transfers' },
-  { icon: <Ionicons name="phone-portrait-outline" size={20} color={LIGHT_GREY} />, label: 'System Info' },
-  { icon: <MaterialCommunityIcons name="medal-outline" size={20} color={LIGHT_GREY} />, label: 'My subscription' },
-  { icon: <Feather name="settings" size={20} color={LIGHT_GREY} />, label: 'Settings' },
-  { icon: <Feather name="aperture" size={20} color={LIGHT_GREY} />, label: 'Themes' },
-  { icon: <Ionicons name="help-circle-outline" size={20} color={LIGHT_GREY} />, label: 'Help & Feedback' },
-  { icon: <Feather name="info" size={20} color={LIGHT_GREY} />, label: 'About this app' },
-];
-
 export default function Dashboard() {
   const [freeSpace, setFreeSpace] = useState(null);
   const [totalSpace, setTotalSpace] = useState(null);
@@ -47,24 +39,45 @@ export default function Dashboard() {
     Videos: 10.4,
     'Other files': 5.57,
   });
+  const router = useRouter();
+
+  const menuItems = [
+    { icon: <FontAwesome5 name="th-large" size={20} color={LIGHT_GREY} />, label: 'Photo Optimizer' },
+    { icon: <Feather name="cloud" size={20} color={LIGHT_GREY} />, label: 'Cloud Transfers' },
+    { icon: <Ionicons name="phone-portrait-outline" size={20} color={LIGHT_GREY} />, label: 'System Info' },
+    { icon: <MaterialCommunityIcons name="medal-outline" size={20} color={LIGHT_GREY} />, label: 'My subscription' },
+    { icon: <Feather name="settings" size={20} color={LIGHT_GREY} />, label: 'Settings' },
+    { icon: <Feather name="aperture" size={20} color={LIGHT_GREY} />, label: 'Themes' },
+    { icon: <Ionicons name="help-circle-outline" size={20} color={LIGHT_GREY} />, label: 'Help & Feedback' },
+    { icon: <Feather name="info" size={20} color={LIGHT_GREY} />, label: 'About this app' },
+  ];
 
   useEffect(() => {
     async function fetchStats() {
       setLoading(true);
       try {
+        // Request permissions for MediaLibrary
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          setFreeSpace(null);
+          setTotalSpace(null);
+          setMediaStats(null);
+          setLoading(false);
+          return;
+        }
         const [free, total, media] = await Promise.all([
           FileSystem.getFreeDiskStorageAsync(),
           FileSystem.getTotalDiskCapacityAsync(),
           MediaLibrary.getAssetsAsync({ first: 1000000 })
         ]);
+        if (!free || !total || !media || media.totalCount === 0) {
+          // This is a placeholder for the removed errorMsg
+        }
         setFreeSpace(free);
         setTotalSpace(total);
         setMediaStats(media);
-        // TODO: Replace with real breakdown if possible
       } catch (e) {
-        setFreeSpace(null);
-        setTotalSpace(null);
-        setMediaStats(null);
+        // This is a placeholder for the removed errorMsg
       }
       setLoading(false);
     }
@@ -163,12 +176,14 @@ export default function Dashboard() {
         </Animated.View>
       </Modal>
       {/* Main content with top gap */}
-      <View style={{ flex: 1, paddingTop: 32 }}>
+      <View style={{ flex: 1, paddingTop: 16 }}>
         <View style={styles.headerRow}>
-          <Pressable onPress={() => setDrawerOpen(true)}>
-            <Ionicons name="menu" size={28} color="#fff" />
-          </Pressable>
-          <Text style={styles.header}>Cleaner</Text>
+          <View style={styles.headerLeft}>
+            <Pressable onPress={() => setDrawerOpen(true)} hitSlop={16} style={{ padding: 4, borderRadius: 20 }}>
+              <Ionicons name="menu" size={32} color="#fff" />
+            </Pressable>
+            <Text style={styles.header}>Cleaner</Text>
+          </View>
           <Pressable style={styles.upgradeBtn}>
             <Text style={styles.upgradeBtnText}>UPGRADE</Text>
           </Pressable>
@@ -200,7 +215,7 @@ export default function Dashboard() {
                   <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: PURPLE }]} /><Text style={styles.legendText}>Files to review</Text></View>
                   <Text style={styles.legendValue}>{reviewGB} GB</Text>
                 </View>
-                <Pressable style={styles.quickCleanBtn}>
+                <Pressable style={styles.quickCleanBtn} onPress={() => router.push('/scanning')}>
                   <Text style={styles.quickCleanBtnText}>QUICK CLEAN</Text>
                 </Pressable>
               </>
@@ -221,7 +236,7 @@ export default function Dashboard() {
             <View style={styles.gridCard}>
               <Ionicons name="images-outline" size={28} color={LIGHT_GREY} />
               <Text style={styles.gridTitle}>Media</Text>
-              <Text style={styles.gridValue}>+ {mediaCount} files</Text>
+              <Text style={styles.gridValue}>{mediaCount > 0 ? `+ ${mediaCount} files` : 'No media found'}</Text>
             </View>
             <View style={styles.gridCard}>
               <Ionicons name="apps-outline" size={28} color={LIGHT_GREY} />
@@ -252,33 +267,48 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 12,
-    marginBottom: 4,
+    marginBottom: 14,
+    minHeight: 44,
+    height: 44,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    minHeight: 44,
+    height: 44,
   },
   header: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
+    marginLeft: 10,
+    minHeight: 44,
+    lineHeight: 44,
+    display: 'flex',
+    alignItems: 'center',
   },
   upgradeBtn: {
-    backgroundColor: YELLOW,
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 7,
-    shadowColor: YELLOW,
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
+    backgroundColor: ORANGE,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    shadowColor: ORANGE,
+    shadowOpacity: 0.12,
+    shadowRadius: 1,
+    elevation: 1,
+    alignSelf: 'center',
+    minHeight: 28,
+    height: 28,
+    justifyContent: 'center',
   },
   upgradeBtnText: {
     color: BLACK,
     fontWeight: 'bold',
-    fontSize: 15,
-    letterSpacing: 1.2,
-    textShadowColor: '#fff',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 11,
+    letterSpacing: 0.8,
+    lineHeight: 14,
   },
   storageCard: {
     backgroundColor: CARD_BG,
@@ -516,18 +546,21 @@ const styles = StyleSheet.create({
   storageRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRadius: 10,
   },
   storageLabelText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 15,
-    marginRight: 4,
+    fontSize: 16,
+    marginRight: 10,
   },
   storageValueText: {
     color: LIGHT_GREY,
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 16,
   },
   menuSection: {
     marginTop: 10,
@@ -538,12 +571,17 @@ const styles = StyleSheet.create({
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    marginBottom: 2,
   },
   menuLabel: {
     color: '#fff',
-    fontSize: 15,
-    marginLeft: 16,
+    fontSize: 17,
+    marginLeft: 14,
     fontWeight: 'bold',
+    lineHeight: 22,
+    letterSpacing: 0.1,
   },
 }); 
