@@ -36,6 +36,8 @@ export default function Settings() {
               style={[styles.item, idx === menuItems.length - 1 && { marginBottom: 0 }]}
               onPress={() => {
                 if (item.label === 'Quick Clean') router.push('/quick-clean-settings');
+                else if (item.label === 'Real-time Detection') router.push('/real-time-detection');
+                else if (item.label === 'Notifications') router.push('/notifications');
               }}
             >
               <View style={{ flex: 1 }}>
