@@ -165,10 +165,19 @@ export default function Dashboard() {
             {/* Menu Items */}
             <View style={styles.menuSection}>
               {menuItems.map((item, i) => (
-                <View style={styles.menuRow} key={i}>
+                <Pressable
+                  style={styles.menuRow}
+                  key={i}
+                  onPress={() => {
+                    if (item.label === 'Settings') {
+                      setDrawerOpen(false);
+                      setTimeout(() => router.push('/settings'), 350);
+                    }
+                  }}
+                >
                   {item.icon}
                   <Text style={styles.menuLabel}>{item.label}</Text>
-                </View>
+                </Pressable>
               ))}
             </View>
             <View style={{ height: 32 }} />
