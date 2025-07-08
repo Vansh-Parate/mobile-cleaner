@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Modal, TouchableWithoutFeedback, Image, Animated, Easing, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Modal, TouchableWithoutFeedback, Image, Animated, Easing, SafeAreaView, PermissionsAndroid, Platform, Linking, NativeModules } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
@@ -6,6 +6,7 @@ import * as Device from 'expo-device';
 import * as Application from 'expo-application';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import DeviceInfo from 'react-native-device-info';
 
 const ORANGE = '#FFA500';
 const BLACK = '#23272F';
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [totalSpace, setTotalSpace] = useState(null);
   const [mediaStats, setMediaStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerAnim = useRef(new Animated.Value(-320)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
@@ -51,6 +53,24 @@ export default function Dashboard() {
     { icon: <Ionicons name="help-circle-outline" size={20} color={LIGHT_GREY} />, label: 'Help & Feedback' },
     { icon: <Feather name="info" size={20} color={LIGHT_GREY} />, label: 'About this app' },
   ];
+
+  useEffect(() => {
+    async function fetchStorage() {
+      setLoading(true);
+      try {
+        const free = await DeviceInfo.getFreeDiskStorage();
+        const total = await DeviceInfo.getTotalDiskCapacity();
+        setFreeSpace(free);
+        setTotalSpace(total);
+      } catch (e) {
+        setFreeSpace(null);
+        setTotalSpace(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStorage();
+  }, []);
 
   useEffect(() => {
     async function fetchStats() {
@@ -124,6 +144,13 @@ export default function Dashboard() {
   let unneededMB = (mediaCount * 0.05).toFixed(1); // fake: 50KB per file
   let hiddenGB = (totalSpace ? (totalSpace * 0.03) / (1024 ** 3) : 0).toFixed(1); // fake: 3% of total
   let reviewGB = (mediaCount * 0.002).toFixed(1); // fake: 2MB per file
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#3498db" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />;
+  }
+  if (error) {
+    return <Text style={{ color: 'red', textAlign: 'center', marginTop: 40 }}>{error}</Text>;
+  }
 
   return (
     <SafeAreaView style={styles.container}>

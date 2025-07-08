@@ -1,7 +1,9 @@
 import { View, Text, StyleSheet, Pressable, Alert, SafeAreaView } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import DeviceInfo from 'react-native-device-info';
+import { getAccurateStorageInfo } from '../utils/AccurateStorageInfo';
 
 const ORANGE = '#FFA500';
 const BLACK = '#23272F';
@@ -12,10 +14,27 @@ const LIGHT_GREY = '#B0B6C3';
 export default function AccessScanScreen() {
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [step, setStep] = useState(1);
+  const [freeSpace, setFreeSpace] = useState('--');
   const router = useRouter();
   // Dummy storage values for now
-  const freeSpace = '32.5';
   const usedPercent = 75;
+
+  useEffect(() => {
+    async function fetchFreeSpace() {
+      try {
+        const info = await getAccurateStorageInfo();
+        if (info && info.freeBytes) {
+          setFreeSpace((info.freeBytes / (1024 * 1024 * 1024)).toFixed(2)); // GB
+        } else {
+          const free = await DeviceInfo.getFreeDiskStorage();
+          setFreeSpace((free / (1024 * 1024 * 1024)).toFixed(2));
+        }
+      } catch (e) {
+        setFreeSpace('--');
+      }
+    }
+    fetchFreeSpace();
+  }, []);
 
   const handlePermission = async () => {
     const { status } = await MediaLibrary.requestPermissionsAsync();

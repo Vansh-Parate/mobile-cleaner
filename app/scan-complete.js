@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { useEffect, useState } from 'react';
 import * as FileSystem from 'expo-file-system';
 import { useRouter } from 'expo-router';
+import DeviceInfo from 'react-native-device-info';
 
 const ORANGE = '#FFA500';
 const BLACK = '#23272F';
@@ -15,10 +16,15 @@ export default function ScanCompleteScreen() {
 
   useEffect(() => {
     async function fetchStorage() {
-      const free = await FileSystem.getFreeDiskStorageAsync();
-      const total = await FileSystem.getTotalDiskCapacityAsync();
-      setFreeSpace(free);
-      setTotalSpace(total);
+      try {
+        const free = await DeviceInfo.getFreeDiskStorage();
+        const total = await DeviceInfo.getTotalDiskCapacity();
+        setFreeSpace(free);
+        setTotalSpace(total);
+      } catch (e) {
+        setFreeSpace(null);
+        setTotalSpace(null);
+      }
     }
     fetchStorage();
   }, []);

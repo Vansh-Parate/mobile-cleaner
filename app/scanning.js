@@ -2,7 +2,7 @@ import { Dimensions } from 'react-native';
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import Svg, { Circle } from 'react-native-svg';
+// import Svg, { Circle } from 'react-native-svg';
 import * as MediaLibrary from 'expo-media-library';
 
 const ORANGE = '#FFA500';
@@ -98,28 +98,8 @@ function CircularProgress({ percent }) {
   const circumference = normalizedRadius * 2 * Math.PI;
   const strokeDashoffset = circumference - (percent / 100) * circumference;
   return (
-    <View style={{ width: 2 * radius, height: 2 * radius, justifyContent: 'center', alignItems: 'center' }}>
-      <Svg width={2 * radius} height={2 * radius}>
-        <Circle
-          stroke={GREY}
-          fill="none"
-          strokeWidth={stroke}
-          cx={radius}
-          cy={radius}
-          r={normalizedRadius}
-        />
-        <Circle
-          stroke={ORANGE}
-          fill="none"
-          strokeWidth={stroke}
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          cx={radius}
-          cy={radius}
-          r={normalizedRadius}
-        />
-      </Svg>
+    <View style={{ width: 2 * radius, height: 2 * radius, borderRadius: radius, borderWidth: 8, borderColor: ORANGE, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ color: ORANGE, fontWeight: 'bold' }}>{Math.round(percent * 100)}%</Text>
     </View>
   );
 }

@@ -5,6 +5,9 @@
       "expo-router"
     ],
     "name": "cleaner",
-    "slug": "cleaner"
+    "slug": "cleaner",
+    "android": {
+      "package": "com.anonymous.cleaner"
+    }
   }
 }
