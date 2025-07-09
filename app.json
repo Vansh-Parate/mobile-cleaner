@@ -7,7 +7,9 @@
     "name": "cleaner",
     "slug": "cleaner",
     "android": {
-      "package": "com.anonymous.cleaner"
+      "package": "com.anonymous.cleaner",
+      "minSdkVersion": 26,
+      "category": "tools"
     }
   }
 }

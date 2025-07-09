@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class StorageInfoPackage implements ReactPackage {
+public class AllFilesAccessPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-        modules.add(new StorageInfoModule(reactContext));
+        modules.add(new AllFilesAccessModule(reactContext));
         return modules;
     }
 

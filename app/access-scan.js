@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, Pressable, Alert, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, SafeAreaView, Linking, Platform } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import DeviceInfo from 'react-native-device-info';
-import { getAccurateStorageInfo } from '../utils/AccurateStorageInfo';
+import * as Application from 'expo-application';
+import { openAllFilesAccessSettings } from '../utils/AllFilesAccess';
 
 const ORANGE = '#FFA500';
 const BLACK = '#23272F';
@@ -22,13 +23,8 @@ export default function AccessScanScreen() {
   useEffect(() => {
     async function fetchFreeSpace() {
       try {
-        const info = await getAccurateStorageInfo();
-        if (info && info.freeBytes) {
-          setFreeSpace((info.freeBytes / (1024 * 1024 * 1024)).toFixed(2)); // GB
-        } else {
-          const free = await DeviceInfo.getFreeDiskStorage();
-          setFreeSpace((free / (1024 * 1024 * 1024)).toFixed(2));
-        }
+        const free = await DeviceInfo.getFreeDiskStorage();
+        setFreeSpace((free / (1024 * 1024 * 1024)).toFixed(2)); // GB
       } catch (e) {
         setFreeSpace('--');
       }
@@ -37,6 +33,11 @@ export default function AccessScanScreen() {
   }, []);
 
   const handlePermission = async () => {
+    if (Platform.OS === 'android' && Platform.Version >= 30) {
+      openAllFilesAccessSettings();
+      return;
+    }
+    // Fallback for older Android or iOS
     const { status } = await MediaLibrary.requestPermissionsAsync();
     if (status === 'granted') {
       setPermissionGranted(true);

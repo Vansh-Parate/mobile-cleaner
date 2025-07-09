@@ -111,3 +111,22 @@ This mobile cleaner app is designed to help users clear junk files, unnecessary 
 
 ## 📁 Folder Structure Suggestion (React Native + Expo)
 
+
+
+
+
+
+
+# Play Store Submission Checklist (All Files Access)
+
+- [ ] App is fully functional and stable
+- [ ] "All files access" feature implemented and visible
+- [ ] Graceful handling if permission not granted
+- [ ] Only necessary permissions requested
+- [ ] Privacy Policy (in app and on Play Store)
+- [ ] Permissions Declaration Form filled (with video demo)
+- [ ] App assets (icon, screenshots, etc.) ready
+- [ ] Tested on Android 11+ and Play Store install
+- [ ] Release APK/AAB built, signed, and uploaded
+- [ ] Release notes written
+- [ ] Monitor Play Console for review feedback
